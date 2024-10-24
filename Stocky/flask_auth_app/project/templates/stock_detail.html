@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ stock.name }} - Stocky{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">{{ stock.name }} ({{ stock.symbol }})</h1>
+    <h2 class="subtitle">Current Price: ${{ stock.price }}</h2>
+    
+    <form method="POST">
+        <div class="field">
+            <label class="label">Number of Shares</label>
+            <div class="control">
+                <input class="input" type="number" name="num_shares" min="1" required>
+            </div>
+        </div>
+        <div class="field">
+            <div class="control">
+                <button class="button is-link" name="action" value="buy">Buy</button>
+                <button class="button is-danger" name="action" value="sell">Sell</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

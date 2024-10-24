@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Available Stocks - Stocky{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Available Stocks</h1>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Symbol</th>
+                <th>Current Price</th>
+                <th>Available Shares</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td><a href="{{ url_for('main.stock_detail', stock_id=stock.id) }}">{{ stock.name }}</a></td> 
+                <td>{{ stock.symbol }}</td>
+                <td>${{ stock.price }}</td>
+                <td>{{ stock.available_shares }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

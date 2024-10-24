@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h1 class="title has-text-centered">Welcome to Stocky</h1>  
+    <h3 class="subtitle has-text-centered">Sign Up</h3>  
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="notification is-danger">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('auth.signup') }}">
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="email" name="email" placeholder="Your Email" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="text" name="name" placeholder="Your Name" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="password" name="password" placeholder="Your Password" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="checkbox">
+                    <input type="checkbox" name="is_admin">
+                    Create Admin Account
+                </label>
+            </div>
+
+            <button class="button is-block is-info is-large is-fullwidth">Sign Up</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

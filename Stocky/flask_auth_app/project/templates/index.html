@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stocky - Your Stock Management Platform</title>
+    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-primary">
+        <div class="container">
+            <div id="navbarMenuHeroA" class="navbar-menu">
+                <div class="navbar-end">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.admin %}
+                            <a href="{{ url_for('auth.admin_page') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'auth.admin_page' else '' }}">Admin Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('main.index') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'main.index' else '' }}">Home</a>
+                            <a href="{{ url_for('main.stocks') }}" class="navbar-item">Stocks</a>
+                            <a href="{{ url_for('main.transactions') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'main.transactions' else '' }}">Profile</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'auth.logout' else '' }}">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'auth.login' else '' }}">Login</a>
+                        <a href="{{ url_for('auth.signup') }}" class="navbar-item {{ 'is-active' if request.endpoint == 'auth.signup' else '' }}">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="title">Welcome to Stocky</h1>
+        <h2 class="subtitle">Manage your investments with ease. Buy, sell, and track your transactions all in one place.</h2>
+
+        {% if current_user.is_authenticated %}
+            <h3 class="title is-3">Dashboard</h3>
+            <p>Welcome back, {{ current_user.name }}!</p>
+            {% if current_user.admin %}
+                <p>You have admin access. Use the Admin Dashboard to manage stocks.</p>
+            {% else %}
+                <p>Your current investments are being tracked.</p>
+            {% endif %}
+        {% else %}
+            <h3 class="title is-3">Join Stocky Today!</h3>
+            <p>Create an account to start managing your stocks.</p>
+        {% endif %}
+    </div>
+</body>
+</html><h1>gcfhfcghcfhjfjfhhffhf</h1>

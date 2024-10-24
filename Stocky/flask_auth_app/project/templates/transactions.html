@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Your Profile - Stocky{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Your Profile</h1>
+
+    <!-- Section to display owned stocks -->
+    <h2 class="subtitle">Your Owned Stocks</h2>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Symbol</th>
+                <th>Number of Shares</th>
+                <th>Current Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks.values() %}
+            <tr>
+                <td>{{ stock.stock_name }}</td>
+                <td>{{ stock.symbol }}</td>
+                <td>{{ stock.num_shares }}</td>
+                <td>${{ stock.current_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section to display transactions -->
+    <h2 class="subtitle">Your Transactions</h2>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Action</th>
+                <th>Number of Shares</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.stock.name }} ({{ transaction.stock.symbol }})</td>
+                <td>{{ transaction.action }}</td>
+                <td>{{ transaction.num_shares }}</td>
+                <td>{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
