@@ -1,19 +1,20 @@
 from flask_login import UserMixin
+from sqlalchemy import Column, Integer, String, Numeric
 from datetime import datetime
 from . import db
 
-# User model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000))
     admin = db.Column(db.Boolean, default=False)
+    balance = db.Column(Numeric(10, 2), default=0.00)
 
     stocks = db.relationship('UserStock', backref='user', lazy=True)
-    transactions = db.relationship('Transaction', backref='user_reference', lazy=True)
+    transactions = db.relationship('Transaction', backref='user_reference', lazy=True, cascade="all, delete-orphan")
 
-# UserStock model
+
 class UserStock(db.Model):
     __tablename__ = 'user_stocks'
     id = db.Column(db.Integer, primary_key=True)
@@ -27,16 +28,16 @@ class UserStock(db.Model):
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
     num_shares = db.Column(db.Integer, nullable=False)
-    action = db.Column(db.String(10), nullable=False)  # 'buy' or 'sell'
+    action = db.Column(db.String(10), nullable=False)  
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='user_transactions', lazy=True)  
     stock = db.relationship('Stock', backref='stock_transactions', lazy=True)  
 
-# Stock model
+
 class Stock(db.Model):
     __tablename__ = 'stocks'
     id = db.Column(db.Integer, primary_key=True)

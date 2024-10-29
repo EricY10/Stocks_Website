@@ -4,8 +4,12 @@
 
 {% block content %}
 <div class="container">
+    
     <h1 class="title">{{ stock.name }} ({{ stock.symbol }})</h1>
-    <h2 class="subtitle">Current Price: ${{ stock.price }}</h2>
+    <h2 class="subtitle">Your Balance: ${{ current_user.balance }}</h2>
+    <p>You currently own {{ owned_shares }} shares of {{ stock.name }}</p>
+    <h3 class="subtitle">Current Price: ${{ stock.price }}</h3>
+    
     
     <form method="POST">
         <div class="field">

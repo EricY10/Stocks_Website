@@ -12,11 +12,8 @@
         <div class="container">
             <div id="navbarMenuHeroA" class="navbar-menu">
                 <div class="navbar-end">
-                    
-                    
                     {% if current_user.is_authenticated %}
                     <a href="{{ url_for('main.admin_page') }}" class="navbar-item is-active">Admin Dashboard</a>
-
                     <a href="{{ url_for('auth.logout') }}" class="navbar-item">Logout</a>
                     {% else %}
                     <a href="{{ url_for('auth.login') }}" class="navbar-item">Login</a>
@@ -29,6 +26,8 @@
 
     <div class="container">
         <h1>Admin Page</h1>
+        
+        <!-- Stock Management Form -->
         <form method="POST">
             <div class="field">
                 <label class="label">Stock Name</label>
@@ -64,34 +63,57 @@
                 </div>
             </div>
         </form>
-        
 
-<h2 class="subtitle">Current Stock Prices</h2>
-<table class="table is-fullwidth is-striped">
-    <thead>
-        <tr>
-            <th>Stock Name</th>
-            <th>Stock Symbol</th>
-            <th>Current Price</th>
-            <th>Available Shares</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for stock in current_prices %}
-        <tr>
-            <td>{{ stock.name }}</td> 
-            <td>{{ stock.symbol }}</td>
-            <td>${{ stock.price }}</td>
-            <td>{{ stock.available_shares }}</td>
-            <td>
-                <form method="POST" action="{{ url_for('main.remove_stock', stock_id=stock.id) }}">
-                    <button class="button is-danger" type="submit">Remove Stock</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <h2 class="subtitle">Current Stock Prices</h2>
+        <table class="table is-fullwidth is-striped">
+            <thead>
+                <tr>
+                    <th>Stock Name</th>
+                    <th>Stock Symbol</th>
+                    <th>Current Price</th>
+                    <th>Available Shares</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in current_prices %}
+                <tr>
+                    <td>{{ stock.name }}</td> 
+                    <td>{{ stock.symbol }}</td>
+                    <td>${{ stock.price }}</td>
+                    <td>{{ stock.available_shares }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('main.remove_stock', stock_id=stock.id) }}">
+                            <button class="button is-danger" type="submit">Remove Stock</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2 class="subtitle">Manage Users</h2>
+        <table class="table is-fullwidth is-striped">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>
+                        <form action="{{ url_for('main.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                            <button class="button is-danger" type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
     </div>
 </body>

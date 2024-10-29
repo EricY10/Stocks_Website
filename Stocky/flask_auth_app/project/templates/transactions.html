@@ -4,7 +4,20 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="title">Your Profile</h1>
+    <h1>Your Profile</h1>
+
+    <h2 class="subtitle">Manage Your Balance</h2>
+<p>Your Balance: ${{ current_user.balance }}</p>
+
+<form action="{{ url_for('main.update_balance') }}" method="POST">
+    <label for="amount">Amount</label>
+    <input type="number" step="0.01" name="amount" id="amount" required>
+    <select name="transaction_type">
+        <option value="deposit">Deposit</option>
+        <option value="withdrawal">Withdrawal</option>
+    </select>
+    <button type="submit" class="button is-primary">Submit</button>
+</form>
 
     <!-- Section to display owned stocks -->
     <h2 class="subtitle">Your Owned Stocks</h2>
@@ -15,18 +28,25 @@
                 <th>Stock Symbol</th>
                 <th>Number of Shares</th>
                 <th>Current Price</th>
+                <th>Sell</th>
             </tr>
         </thead>
         <tbody>
             {% for stock in stocks.values() %}
             <tr>
-                <td>{{ stock.stock_name }}</td>
+                <td><a href="{{ url_for('main.stock_detail', stock_id=stock.id) }}">{{ stock.stock_name }}</a></td> 
                 <td>{{ stock.symbol }}</td>
                 <td>{{ stock.num_shares }}</td>
                 <td>${{ stock.current_price }}</td>
+                <td>
+                    <form action="{{ url_for('main.sell_stock', stock_symbol=stock.symbol) }}" method="POST">
+                        <input type="number" name="num_shares" placeholder="Enter shares to sell" required>
+                        <button type="submit" class="button is-danger">Sell</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
-        </tbody>
+        </tbody>  
     </table>
 
     <!-- Section to display transactions -->
@@ -51,5 +71,6 @@
             {% endfor %}
         </tbody>
     </table>
+
 </div>
 {% endblock %}
