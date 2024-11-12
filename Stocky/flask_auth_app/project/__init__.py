@@ -16,7 +16,7 @@ def create_app():
 
    
     app.config['SECRET_KEY'] = 'your_secret_key'  
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/project_db'  
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://admin:Password!123@database-1.ct2gkce4mxle.us-east-1.rds.amazonaws.com/project_db'  
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
 
     # Initialize the database
