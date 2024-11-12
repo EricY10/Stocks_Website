@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from sqlalchemy import Column, Integer, String, Numeric
-from datetime import datetime
+from datetime import datetime, time
 from . import db
 
 class User(UserMixin, db.Model):
@@ -48,3 +48,19 @@ class Stock(db.Model):
 
     def __repr__(self):
         return f'<Stock {self.symbol}: {self.name}, Price: ${self.price}, Available: {self.available_shares}>'
+
+
+class MarketHours(db.Model):
+    __tablename__ = 'market_hours'
+
+    id = db.Column(db.Integer, primary_key=True)
+    opening_time = db.Column(db.Time, nullable=False) 
+    closing_time = db.Column(db.Time, nullable=False)  
+
+    def __init__(self, opening_time=None, closing_time=None):
+        if opening_time is None:
+            opening_time = time(9, 30)  # default time 9:30 AM
+        if closing_time is None:
+            closing_time = time(16, 0)  # default time 4:00 PM
+        self.opening_time = opening_time
+        self.closing_time = closing_time

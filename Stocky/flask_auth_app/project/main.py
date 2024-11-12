@@ -1,25 +1,32 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, redirect
 from flask_login import login_required, current_user
 from . import db
+from .models import MarketHours
 from project.models import User, Transaction, Stock, UserStock
 from decimal import Decimal
 from sqlalchemy import func
 from functools import wraps
+from datetime import time, datetime
 
 
 main = Blueprint('main', __name__)
 
+@main.app_context_processor
+def inject_market_status():
+    return dict(is_market_open=is_market_open())
+
 @main.route('/')
 @login_required
 def index():
+    market_hours = MarketHours.query.first()
     # Fetch current stock prices
     current_prices = Stock.query.all() 
-    return render_template('index.html', current_prices=current_prices)
+    return render_template('index.html', current_prices=current_prices, market_hours=market_hours)
 
 @main.route('/transactions') #/profile
 @login_required
 def transactions():
-    
+    market_hours = MarketHours.query.first()
     transactions = Transaction.query.filter_by(user_id=current_user.id).all()
     stocks_owned = {}
 
@@ -40,7 +47,7 @@ def transactions():
     # Filter out stocks with 0 shares
     stocks_owned = {symbol: details for symbol, details in stocks_owned.items() if details['num_shares'] > 0}
 
-    return render_template('transactions.html', transactions=transactions, stocks=stocks_owned)
+    return render_template('transactions.html', transactions=transactions, stocks=stocks_owned, market_hours=market_hours)
 
 def admin_required(f):
     @wraps(f)
@@ -55,6 +62,14 @@ def admin_required(f):
 @login_required
 @admin_required
 def admin_page():
+    market_hours = MarketHours.query.first()
+    if not market_hours:
+        default_open = time(9, 30)  # default 9:30 AM
+        default_close = time(16, 0)  # default 4:00 PM
+        market_hours = MarketHours(opening_time=default_open, closing_time=default_close)
+        db.session.add(market_hours)
+        db.session.commit()
+
     if request.method == 'POST':
         try:
             stock_name = request.form['stock_name']
@@ -76,7 +91,7 @@ def admin_page():
     
     current_prices = Stock.query.all()
     users = User.query.all()  # Fetch all users from the database
-    return render_template('admin.html', current_prices=current_prices, users=users)
+    return render_template('admin.html', current_prices=current_prices, users=users, market_hours=market_hours)
 
 @main.route('/delete_user/<int:user_id>', methods=['POST'])
 @login_required  
@@ -116,8 +131,9 @@ def remove_stock(stock_id):
 @main.route('/stocks', methods=['GET'])
 @login_required
 def stocks():
+    market_hours = MarketHours.query.first()
     all_stocks = Stock.query.all()  
-    return render_template('stocks.html', stocks=all_stocks)
+    return render_template('stocks.html', stocks=all_stocks, market_hours=market_hours)
 
 @main.route('/stock/<int:stock_id>', methods=['GET', 'POST'])
 @login_required
@@ -138,10 +154,23 @@ def stock_detail(stock_id):
   
     owned_shares = bought_shares - sold_shares
 
+    # Fetch the market hours
+    market_hours = MarketHours.query.first()
+    
+   # Check if market_hours exists and compare current time with market hours
+    if market_hours:
+        current_time = datetime.now().time()
+        if current_time < market_hours.opening_time or current_time > market_hours.closing_time:
+            flash('The market is closed. You cannot buy or sell stocks outside of market hours.', 'danger')
+            if request.method == 'POST':
+                return redirect(url_for('main.stock_detail', stock_id=stock_id))  # Redirect on POST to avoid form submission
+            else:
+                return render_template('stock_detail.html', stock=stock, owned_shares=owned_shares)  # Render normally on GET
+
+
     if request.method == 'POST':
         num_shares = int(request.form['num_shares'])
-        action = request.form['action']  
-        
+        action = request.form['action']
         stock_price = Decimal(stock.price)
 
         if action == 'buy':
@@ -198,6 +227,16 @@ def stock_detail(stock_id):
 @login_required
 def sell_stock(stock_symbol):
     stock = Stock.query.filter_by(symbol=stock_symbol).first_or_404()
+
+    market_hours = MarketHours.query.first()
+    
+    # Check if market_hours exists and compare current time with market hours
+    if market_hours:
+        current_time = datetime.now().time()
+        if current_time < market_hours.opening_time or current_time > market_hours.closing_time:
+            flash('The market is closed. You cannot sell stocks outside of market hours.', 'danger')
+            return redirect(url_for('main.transactions'))
+
     if request.method == 'POST':
         num_shares_to_sell = int(request.form['num_shares'])
         stock_price = Decimal(stock.price)
@@ -246,3 +285,35 @@ def update_balance():
 
     db.session.commit()
     return redirect(url_for('main.transactions'))
+
+
+
+# Market hours (24-hour format)
+MARKET_OPEN = time(9, 30)   # 9:30 AM
+MARKET_CLOSE = time(16, 0)  # 4:00 PM
+
+def is_market_open():
+    now = datetime.now().time()
+    return MARKET_OPEN <= now <= MARKET_CLOSE
+
+
+
+
+@main.route('/update_market_hours', methods=['POST'])
+@login_required
+@admin_required
+def update_market_hours():
+    new_opening_time = request.form.get('new_opening_time')
+    new_closing_time = request.form.get('new_closing_time')
+    
+    market_hours = MarketHours.query.first()
+    if market_hours:
+        market_hours.opening_time = datetime.strptime(new_opening_time, '%H:%M').time()
+        market_hours.closing_time = datetime.strptime(new_closing_time, '%H:%M').time()
+        db.session.commit()
+        
+        flash("Market hours updated successfully!", 'success')
+    else:
+        flash("Market hours could not be updated.", 'danger')
+
+    return redirect(url_for('main.admin_page'))
