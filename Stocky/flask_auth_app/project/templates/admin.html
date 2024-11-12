@@ -25,8 +25,31 @@
     </nav>
 
     <div class="container">
-        <h1>Admin Page</h1>
+        <!-- Market Hours Section -->
+        <div class="market-hours">
+            <h2>Market Hours</h2>
+            {% if market_hours %}
+            <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
+            <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
+        {% else %}
+            <p>No market hours available.</p>
+        {% endif %}        
+        </div>
+
+         <!-- Change Market Hours Form -->
+         <form action="{{ url_for('main.update_market_hours') }}" method="POST">
+            <label for="new_opening_time">Opening Time:</label>
+            <input type="time" id="new_opening_time" name="new_opening_time" value="{{ market_hours.opening_time.strftime('%H:%M') }}" required>
         
+            <label for="new_closing_time">Closing Time:</label>
+            <input type="time" id="new_closing_time" name="new_closing_time" value="{{ market_hours.closing_time.strftime('%H:%M') }}" required>
+        
+            <button type="submit">Update Market Hours</button>
+        </form>
+        
+
+        <h1>Admin Page</h1>
+
         <!-- Stock Management Form -->
         <form method="POST">
             <div class="field">
@@ -35,28 +58,28 @@
                     <input class="input" type="text" name="stock_name" required>
                 </div>
             </div>
-        
+
             <div class="field">
                 <label class="label">Stock Symbol</label>
                 <div class="control">
                     <input class="input" type="text" name="stock_symbol" required>
                 </div>
             </div>
-        
+
             <div class="field">
                 <label class="label">Starting Market Price</label>
                 <div class="control">
                     <input class="input" type="number" step="0.01" name="stock_price" required>
                 </div>
             </div>
-        
+
             <div class="field">
                 <label class="label">Number of Available Shares</label>
                 <div class="control">
                     <input class="input" type="number" name="available_shares" required min="1">
                 </div>
             </div>
-        
+
             <div class="field">
                 <div class="control">
                     <button class="button is-link">Add Stock</button>
@@ -114,7 +137,6 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
 </body>
 </html>

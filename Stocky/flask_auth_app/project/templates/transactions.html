@@ -4,6 +4,17 @@
 
 {% block content %}
 <div class="container">
+    <!-- Market Hours Section -->
+    <div class="market-hours">
+        <h2>Market Hours</h2>
+        {% if market_hours %}
+        <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
+        <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
+    {% else %}
+        <p>No market hours available.</p>
+    {% endif %}        
+    </div>
+<div class="container">
     <h1>Your Profile</h1>
 
     <h2 class="subtitle">Manage Your Balance</h2>

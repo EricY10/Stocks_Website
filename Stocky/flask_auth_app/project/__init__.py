@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
-
+from datetime import time
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
@@ -10,6 +10,26 @@ migrate = Migrate()
 
 # Initialize LoginManager
 login_manager = LoginManager()
+
+def initialize_market_hours():
+    from .models import MarketHours
+    try:
+        market_hours = MarketHours.query.first()  # Check if market hours already exist
+        if not market_hours:
+            # Set default opening and closing times
+            default_open = time(9, 30)  # 9:30 AM
+            default_close = time(16, 0)  # 4:00 PM
+            
+            # Create new MarketHours object and add to session
+            market_hours = MarketHours(opening_time=default_open, closing_time=default_close)
+            db.session.add(market_hours)
+            db.session.commit()  # Commit to save the data to the database
+            print("Default market hours initialized.")
+        else:
+            print("Market hours already exist.")
+    except Exception as e:
+        db.session.rollback()  # Rollback if any error occurs during commit
+        print(f"An error occurred while initializing market hours: {e}")
 
 def create_app():
     app = Flask(__name__)
