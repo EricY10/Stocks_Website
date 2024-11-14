@@ -6,9 +6,9 @@ from . import db
 
 auth = Blueprint('auth', __name__)
 
-def generate_limited_password_hash(password, max_length=100): 
-    hashed_password = generate_password_hash(password) 
-    return hashed_password[:max_length]
+
+def generate_password_hash_no_limit(password):
+    return generate_password_hash(password)
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -16,14 +16,21 @@ def signup():
         email = request.form['email']
         name = request.form['name']
         password = request.form['password']
-        admin = 'admin' in request.form  #  admin checkbox 
+        admin = 'admin' in request.form  # admin checkbox
 
-        hashed_password = generate_limited_password_hash(password) 
+        # Check if the email is already registered
+        if User.query.filter_by(email=email).first():
+            flash('Email address already in use.', 'danger')
+            return redirect(url_for('auth.signup'))
+
+        # Hash the password without truncation
+        hashed_password = generate_password_hash_no_limit(password)
         new_user = User(email=email, name=name, password=hashed_password, admin=admin)
         
         db.session.add(new_user)
         db.session.commit()
-     
+
+        flash('Account created successfully! Please log in.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('signup.html')
@@ -35,13 +42,18 @@ def login():
         password = request.form['password']
 
         user = User.query.filter_by(email=email).first()
+
         if user and check_password_hash(user.password, password):
             login_user(user)
-
+            flash('Logged in successfully!', 'success')
+            
+            # Redirect based on admin status
             if user.admin:
                 return redirect(url_for('main.admin_page'))
             else:
                 return redirect(url_for('main.index'))
+        else:
+            flash('Invalid email or password. Please try again.', 'danger')
 
     return render_template('login.html')
 
@@ -49,6 +61,5 @@ def login():
 @login_required
 def logout():
     logout_user()
+    flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
-
-

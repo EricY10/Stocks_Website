@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Stocky - Your Stock Management Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='basic.css') }}">
-
 </head>
 <body>
     <!-- Navbar -->
@@ -32,17 +31,31 @@
         </div>
     </nav>
 
+    <!-- Flash Messages Section -->
     <div class="container">
-        <!-- Market Hours Section -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Market Hours Section -->
+    <div class="container">
         <div class="market-hours">
             <h2>Market Hours</h2>
             {% if market_hours %}
-            <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
-            <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
-        {% else %}
-            <p>No market hours available.</p>
-        {% endif %}        
+                <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
+                <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
+            {% else %}
+                <p>No market hours available.</p>
+            {% endif %}
         </div>
+    </div>
 
     <div class="container">
         <h1 class="title">Welcome to Stocky</h1>
@@ -62,4 +75,4 @@
         {% endif %}
     </div>
 </body>
-
+</html>
