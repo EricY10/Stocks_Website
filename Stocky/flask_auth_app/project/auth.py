@@ -6,6 +6,10 @@ from . import db
 
 auth = Blueprint('auth', __name__)
 
+def generate_limited_password_hash(password, max_length=100): 
+    hashed_password = generate_password_hash(password) 
+    return hashed_password[:max_length]
+
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -14,7 +18,8 @@ def signup():
         password = request.form['password']
         admin = 'admin' in request.form  #  admin checkbox 
 
-        new_user = User(email=email, name=name, password=generate_password_hash(password), admin=admin)
+        hashed_password = generate_limited_password_hash(password) 
+        new_user = User(email=email, name=name, password=hashed_password,password=hashed_password, admin=admin)
         
         db.session.add(new_user)
         db.session.commit()
