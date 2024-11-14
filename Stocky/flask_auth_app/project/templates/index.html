@@ -74,5 +74,17 @@
             <p>Create an account to start managing your stocks.</p>
         {% endif %}
     </div>
+     <!-- JavaScript for closing flash messages -->
+     <script>
+        setTimeout(function() {
+            let flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(msg) {
+                msg.classList.add('fade-out');
+                setTimeout(function() {
+                    msg.remove(); // Remove the message after fading out
+                }, 1000); // 1 second for fade out
+            });
+        }, 3000); // Flash message disappears after 3 seconds
+    </script> 
 </body>
 </html>
