@@ -1,0 +1,190 @@
+/* Reset default browser styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* General body and font settings */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar styling */
+.navbar {
+    background-color: #0056b3;
+    padding: 0.2rem 0;
+    height: 80px;
+}
+
+.navbar .navbar-item {
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.navbar .navbar-item:hover {
+    background-color: #003d75;
+}
+
+.navbar .navbar-item.is-active {
+    background-color: #003d75;
+}
+
+.navbar-menu {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.navbar .container {
+    width: 100%;
+}
+
+/* Main content container */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Title and subtitle */
+h1.title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+h2.subtitle {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+* Market hours section */
+.market-hours {
+    background-color: #1a1919;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.market-hours-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.market-hours h2 {
+    font-size: 1.8rem;
+    color: #0056b3;
+}
+
+.market-hours-times {
+    display: flex;
+    gap: 20px; /* Space between Opening and Closing */
+}
+
+.market-hours p {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0; /* Remove margin for inline display */
+}
+
+
+/* Dashboard and user-specific content */
+h3.title.is-3 {
+    font-size: 2rem;
+    color: #333;
+    margin-top: 20px;
+}
+
+p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Flash message styling */
+.flash-message {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 80%;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+}
+
+/* Success message */
+.flash-message.success { background-color: #28a745; }
+.flash-message.error { background-color: #dc3545; }
+.flash-message.warning { background-color: #ffc107; }
+.flash-message.info { background-color: #17a2b8; }
+
+/* Close button for flash message */
+.flash-message .close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    color: rgb(2, 2, 2);
+    cursor: pointer;
+}
+
+/* Optional: Add fade-out effect */
+.flash-message.fade-out { animation: fadeOut 1s forwards; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+    .navbar-menu {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    h1.title {
+        font-size: 2rem;
+    }
+
+    h2.subtitle {
+        font-size: 1.2rem;
+    }
+
+    h3.title.is-3 {
+        font-size: 1.8rem;
+    }
+}

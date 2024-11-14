@@ -1,32 +1,64 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Stocky{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='basic.css') }}">
 </head>
 <body>
-    <nav>
-        <ul>
-            {% if current_user.is_authenticated %}
-                {% if current_user.admin %}
-                    <li><a href="{{ url_for('main.admin') }}">Admin Dashboard</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                    <a href="{{ url_for('main.stocks') }}" class="navbar-item">Stocks</a>
-                    <li><a href="{{ url_for('main.transactions') }}">Profile</a></li>
-                {% endif %}
-                <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
-            {% else %}
-                <li><a href="{{ url_for('auth.login') }}">Login</a></li>
-                <li><a href="{{ url_for('auth.signup') }}">Signup</a></li>
-            {% endif %}
-        </ul>
+    <!-- Navbar -->
+    <nav class="navbar is-primary">
+        <div class="container">
+            <div id="navbarMenuHeroA" class="navbar-menu">
+                <div class="navbar-end">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.admin %}
+                            <a href="{{ url_for('main.admin_page') }}" class="navbar-item is-active">Admin Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('main.index') }}" class="navbar-item">Home</a>
+                            <a href="{{ url_for('main.stocks') }}" class="navbar-item">Stocks</a>
+                            <a href="{{ url_for('main.transactions') }}" class="navbar-item">Profile</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="navbar-item">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="navbar-item">Login</a>
+                        <a href="{{ url_for('auth.signup') }}" class="navbar-item">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    <span>{{ message }}</span>
+                    <span class="close" onclick="this.parentElement.style.display='none';">&times;</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
 
     <div>
         {% block content %}{% endblock %}
     </div>
+
+    <!-- JavaScript for closing flash messages -->
+    <script>
+        setTimeout(function() {
+            let flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(msg) {
+                msg.classList.add('fade-out');
+                setTimeout(function() {
+                    msg.remove(); // Remove the message after fading out
+                }, 1000); // 1 second for fade out
+            });
+        }, 3000); // Flash message disappears after 3 seconds
+    </script>
 </body>
 </html>

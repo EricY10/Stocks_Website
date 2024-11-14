@@ -32,6 +32,7 @@ class Transaction(db.Model):
     stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
     num_shares = db.Column(db.Integer, nullable=False)
     action = db.Column(db.String(10), nullable=False)  
+    price = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='user_transactions', lazy=True)  

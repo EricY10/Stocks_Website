@@ -3,6 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from datetime import time
+from flask_socketio import SocketIO
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
+import random
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
@@ -10,6 +14,12 @@ migrate = Migrate()
 
 # Initialize LoginManager
 login_manager = LoginManager()
+
+# Initialize SocketIO for real-time communication
+socketio = SocketIO()
+
+# Initialize APScheduler
+scheduler = BackgroundScheduler()
 
 def initialize_market_hours():
     from .models import MarketHours
@@ -31,12 +41,28 @@ def initialize_market_hours():
         db.session.rollback()  # Rollback if any error occurs during commit
         print(f"An error occurred while initializing market hours: {e}")
 
+def update_stock_prices():
+    from .models import Stock
+    with app.app_context():  # Ensure the Flask app context is active
+        stocks = Stock.query.all()
+        for stock in stocks:
+            fluctuation = random.uniform(-0.05, 0.05)  # Change stock price by -5% to 5%
+            old_price = stock.price
+            stock.price += stock.price * fluctuation
+
+            # Round the price to 2 decimal places
+            stock.price = round(stock.price, 2)
+
+            db.session.commit()  # Commit updated stock prices to the database
+            
+            # Emit price update to clients (pass the new price)
+            socketio.emit('stock_price_update', {'new_price': stock.price})
+
+
 def create_app():
     app = Flask(__name__)
 
-   
     app.config['SECRET_KEY'] = 'your_secret_key'  
-    #host:password@localhost/project_db
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost/project_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  
 
@@ -53,11 +79,16 @@ def create_app():
         from .models import User  # Import here to avoid circular import
         return User.query.get(int(user_id))
 
+    # Initialize Flask-SocketIO
+    socketio.init_app(app)
+
+    # Initialize market hours
     with app.app_context():
-        # Import models within app context to avoid circular imports
-        from .models import User, UserStock
-        # Create the database and tables
-        db.create_all()
+        initialize_market_hours()
+
+    # Set up a job to run every 10 seconds and update stock prices
+    scheduler.add_job(func=update_stock_prices, trigger='interval', seconds=10)
+    scheduler.start()
 
     # Register blueprints
     from .auth import auth as auth_blueprint
@@ -67,3 +98,9 @@ def create_app():
     app.register_blueprint(main_blueprint)
 
     return app
+
+# Run the application with socketio.run() to handle both Flask and SocketIO events
+app = create_app()
+
+if __name__ == "__main__":
+    socketio.run(app, debug=True)

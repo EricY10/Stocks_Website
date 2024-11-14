@@ -23,7 +23,7 @@ def index():
     current_prices = Stock.query.all() 
     return render_template('index.html', current_prices=current_prices, market_hours=market_hours)
 
-@main.route('/transactions') #/profile
+@main.route('/transactions')  # /profile
 @login_required
 def transactions():
     market_hours = MarketHours.query.first()
@@ -33,15 +33,20 @@ def transactions():
     for transaction in transactions:
         stock = Stock.query.get(transaction.stock_id)
         if stock:
+            # Determine the change in number of shares based on the action (buy or sell)
+            share_change = transaction.num_shares if transaction.action == 'buy' else -transaction.num_shares
+
+            # If the stock is already in the dictionary, update the number of shares
             if stock.symbol in stocks_owned:
-                stocks_owned[stock.symbol]['num_shares'] += transaction.num_shares if transaction.action == 'buy' else -transaction.num_shares
+                stocks_owned[stock.symbol]['num_shares'] += share_change
             else:
+                # If it's a new stock, initialize its data
                 stocks_owned[stock.symbol] = {
                     'id': stock.id,
                     'stock_name': stock.name,
                     'symbol': stock.symbol,
-                    'num_shares': transaction.num_shares if transaction.action == 'buy' else -transaction.num_shares,
-                    'current_price': stock.price  
+                    'num_shares': share_change,  # Initialize based on action
+                    'current_price': stock.price
                 }
 
     # Filter out stocks with 0 shares
@@ -157,7 +162,7 @@ def stock_detail(stock_id):
     # Fetch the market hours
     market_hours = MarketHours.query.first()
     
-   # Check if market_hours exists and compare current time with market hours
+    # Check if market_hours exists and compare current time with market hours
     if market_hours:
         current_time = datetime.now().time()
         if current_time < market_hours.opening_time or current_time > market_hours.closing_time:
@@ -166,7 +171,6 @@ def stock_detail(stock_id):
                 return redirect(url_for('main.stock_detail', stock_id=stock_id))  # Redirect on POST to avoid form submission
             else:
                 return render_template('stock_detail.html', stock=stock, owned_shares=owned_shares)  # Render normally on GET
-
 
     if request.method == 'POST':
         num_shares = int(request.form['num_shares'])
@@ -190,8 +194,11 @@ def stock_detail(stock_id):
 
                     # Create a new transaction for buying
                     transaction = Transaction(
-                        user_id=current_user.id, stock_id=stock.id,
-                        num_shares=num_shares, action='buy'
+                        user_id=current_user.id, 
+                        stock_id=stock.id,
+                        num_shares=num_shares, 
+                        action='buy',
+                        price=float(stock_price)  # Store the stock price at the time of purchase
                     )
                     db.session.add(transaction)
                     db.session.commit()
@@ -208,12 +215,14 @@ def stock_detail(stock_id):
                 stock.available_shares += num_shares
 
                 total_revenue = num_shares * stock_price
-
                 current_user.balance += total_revenue
 
                 transaction = Transaction(
-                    user_id=current_user.id, stock_id=stock.id,
-                    num_shares=num_shares, action='sell'
+                    user_id=current_user.id, 
+                    stock_id=stock.id,
+                    num_shares=num_shares, 
+                    action='sell',
+                    price=float(stock_price) 
                 )
                 db.session.add(transaction)
                 db.session.commit()
@@ -229,7 +238,7 @@ def sell_stock(stock_symbol):
     stock = Stock.query.filter_by(symbol=stock_symbol).first_or_404()
 
     market_hours = MarketHours.query.first()
-    
+
     # Check if market_hours exists and compare current time with market hours
     if market_hours:
         current_time = datetime.now().time()
@@ -250,15 +259,21 @@ def sell_stock(stock_symbol):
             flash('You do not own enough shares to sell', 'danger')
         else:
             stock.available_shares += num_shares_to_sell
- 
+
             total_revenue = num_shares_to_sell * stock_price
-            
-            transaction = Transaction(user_id=current_user.id, stock_id=stock.id,
-                                      num_shares=num_shares_to_sell, action='sell')
+
+            # Create a new transaction for selling
+            transaction = Transaction(
+                user_id=current_user.id, 
+                stock_id=stock.id,
+                num_shares=num_shares_to_sell, 
+                action='sell',
+                price=float(stock_price)  
+            )
             db.session.add(transaction)
             current_user.balance += total_revenue
             db.session.commit()
-            
+
             flash(f'Successfully sold {num_shares_to_sell} shares of {stock.name}', 'success')
             return redirect(url_for('main.transactions'))
 

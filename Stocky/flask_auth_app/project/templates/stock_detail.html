@@ -4,12 +4,10 @@
 
 {% block content %}
 <div class="container">
-    
     <h1 class="title">{{ stock.name }} ({{ stock.symbol }})</h1>
     <h2 class="subtitle">Your Balance: ${{ current_user.balance }}</h2>
     <p>You currently own {{ owned_shares }} shares of {{ stock.name }}</p>
-    <h3 class="subtitle">Current Price: ${{ stock.price }}</h3>
-    
+    <h3 class="subtitle" id="current-price">Current Price: ${{ stock.price }}</h3> <!-- Add an ID here for easy access in JS -->
     
     <form method="POST">
         <div class="field">
@@ -26,4 +24,19 @@
         </div>
     </form>
 </div>
+
+<!-- Add SocketIO script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+<script type="text/javascript">
+    // Connect to the Flask-SocketIO server
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Listen for stock price updates from the server
+    socket.on('stock_price_update', function(data) {
+        console.log('Stock prices updated');
+        // Update the stock price displayed on the page
+        var newPrice = data.new_price; // Assuming the server sends the updated price in 'new_price'
+        document.getElementById("current-price").innerText = "Current Price: $" + newPrice;
+    });
+</script>
 {% endblock %}

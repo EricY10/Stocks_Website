@@ -1,142 +1,121 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Page - Stocky</title>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar is-primary">
-        <div class="container">
-            <div id="navbarMenuHeroA" class="navbar-menu">
-                <div class="navbar-end">
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main.admin_page') }}" class="navbar-item is-active">Admin Dashboard</a>
-                    <a href="{{ url_for('auth.logout') }}" class="navbar-item">Logout</a>
-                    {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="navbar-item">Login</a>
-                    <a href="{{ url_for('auth.signup') }}" class="navbar-item">Sign Up</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <div class="container">
-        <!-- Market Hours Section -->
-        <div class="market-hours">
-            <h2>Market Hours</h2>
-            {% if market_hours %}
-            <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
-            <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
+{% block title %}Admin Page - Stocky{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+
+    <!-- Market Hours Section -->
+    <div class="market-hours">
+        <h2>Market Hours</h2>
+        {% if market_hours %}
+        <p>Opening: {{ market_hours.opening_time.strftime('%I:%M %p') }}</p>
+        <p>Closing: {{ market_hours.closing_time.strftime('%I:%M %p') }}</p>
         {% else %}
             <p>No market hours available.</p>
         {% endif %}        
+    </div>
+
+    <!-- Change Market Hours Form -->
+    <form action="{{ url_for('main.update_market_hours') }}" method="POST">
+        <label for="new_opening_time">Opening Time:</label>
+        <input type="time" id="new_opening_time" name="new_opening_time" value="{{ market_hours.opening_time.strftime('%H:%M') }}" required>
+
+        <label for="new_closing_time">Closing Time:</label>
+        <input type="time" id="new_closing_time" name="new_closing_time" value="{{ market_hours.closing_time.strftime('%H:%M') }}" required>
+
+        <button type="submit">Update Market Hours</button>
+    </form>
+
+    <h1>Admin Page</h1>
+
+    <!-- Stock Management Form -->
+    <form method="POST">
+        <div class="field">
+            <label class="label">Stock Name</label>
+            <div class="control">
+                <input class="input" type="text" name="stock_name" required>
+            </div>
         </div>
 
-         <!-- Change Market Hours Form -->
-         <form action="{{ url_for('main.update_market_hours') }}" method="POST">
-            <label for="new_opening_time">Opening Time:</label>
-            <input type="time" id="new_opening_time" name="new_opening_time" value="{{ market_hours.opening_time.strftime('%H:%M') }}" required>
-        
-            <label for="new_closing_time">Closing Time:</label>
-            <input type="time" id="new_closing_time" name="new_closing_time" value="{{ market_hours.closing_time.strftime('%H:%M') }}" required>
-        
-            <button type="submit">Update Market Hours</button>
-        </form>
-        
-
-        <h1>Admin Page</h1>
-
-        <!-- Stock Management Form -->
-        <form method="POST">
-            <div class="field">
-                <label class="label">Stock Name</label>
-                <div class="control">
-                    <input class="input" type="text" name="stock_name" required>
-                </div>
+        <div class="field">
+            <label class="label">Stock Symbol</label>
+            <div class="control">
+                <input class="input" type="text" name="stock_symbol" required>
             </div>
+        </div>
 
-            <div class="field">
-                <label class="label">Stock Symbol</label>
-                <div class="control">
-                    <input class="input" type="text" name="stock_symbol" required>
-                </div>
+        <div class="field">
+            <label class="label">Starting Market Price</label>
+            <div class="control">
+                <input class="input" type="number" step="0.01" name="stock_price" required>
             </div>
+        </div>
 
-            <div class="field">
-                <label class="label">Starting Market Price</label>
-                <div class="control">
-                    <input class="input" type="number" step="0.01" name="stock_price" required>
-                </div>
+        <div class="field">
+            <label class="label">Number of Available Shares</label>
+            <div class="control">
+                <input class="input" type="number" name="available_shares" required min="1">
             </div>
+        </div>
 
-            <div class="field">
-                <label class="label">Number of Available Shares</label>
-                <div class="control">
-                    <input class="input" type="number" name="available_shares" required min="1">
-                </div>
+        <div class="field">
+            <div class="control">
+                <button class="button is-link">Add Stock</button>
             </div>
+        </div>
+    </form>
 
-            <div class="field">
-                <div class="control">
-                    <button class="button is-link">Add Stock</button>
-                </div>
-            </div>
-        </form>
+    <h2 class="subtitle">Current Stock Prices</h2>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Symbol</th>
+                <th>Current Price</th>
+                <th>Available Shares</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in current_prices %}
+            <tr>
+                <td>{{ stock.name }}</td> 
+                <td>{{ stock.symbol }}</td>
+                <td>${{ stock.price }}</td>
+                <td>{{ stock.available_shares }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('main.remove_stock', stock_id=stock.id) }}">
+                        <button class="button is-danger" type="submit">Remove Stock</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        <h2 class="subtitle">Current Stock Prices</h2>
-        <table class="table is-fullwidth is-striped">
-            <thead>
-                <tr>
-                    <th>Stock Name</th>
-                    <th>Stock Symbol</th>
-                    <th>Current Price</th>
-                    <th>Available Shares</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for stock in current_prices %}
-                <tr>
-                    <td>{{ stock.name }}</td> 
-                    <td>{{ stock.symbol }}</td>
-                    <td>${{ stock.price }}</td>
-                    <td>{{ stock.available_shares }}</td>
-                    <td>
-                        <form method="POST" action="{{ url_for('main.remove_stock', stock_id=stock.id) }}">
-                            <button class="button is-danger" type="submit">Remove Stock</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h2 class="subtitle">Manage Users</h2>
-        <table class="table is-fullwidth is-striped">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>
-                        <form action="{{ url_for('main.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
-                            <button class="button is-danger" type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
+    <h2 class="subtitle">Manage Users</h2>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <td>{{ user.name }}</td>
+                <td>
+                    <form action="{{ url_for('main.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                        <button class="button is-danger" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
