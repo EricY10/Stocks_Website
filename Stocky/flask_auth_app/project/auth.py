@@ -19,7 +19,7 @@ def signup():
         admin = 'admin' in request.form  #  admin checkbox 
 
         hashed_password = generate_limited_password_hash(password) 
-        new_user = User(email=email, name=name, password=hashed_password,password=hashed_password, admin=admin)
+        new_user = User(email=email, name=name, password=hashed_password, admin=admin)
         
         db.session.add(new_user)
         db.session.commit()
