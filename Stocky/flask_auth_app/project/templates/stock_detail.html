@@ -31,12 +31,20 @@
     // Connect to the Flask-SocketIO server
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
+    // Get the current stock symbol from the page (rendered by Flask)
+    var currentStockSymbol = "{{ stock.symbol }}";
+
     // Listen for stock price updates from the server
     socket.on('stock_price_update', function(data) {
-        console.log('Stock prices updated');
-        // Update the stock price displayed on the page
-        var newPrice = data.new_price; // Assuming the server sends the updated price in 'new_price'
-        document.getElementById("current-price").innerText = "Current Price: $" + newPrice;
+        console.log('Stock prices updated', data);
+
+        // Check if the update is for the currently viewed stock
+        if (data.symbol === currentStockSymbol) {
+            // Update the stock price displayed on the page
+            var newPrice = data.new_price;
+            document.getElementById("current-price").innerText = "Current Price: $" + newPrice;
+        }
     });
 </script>
+
 {% endblock %}
