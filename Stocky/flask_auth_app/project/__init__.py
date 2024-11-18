@@ -69,7 +69,7 @@ def create_app():
     with app.app_context():
         initialize_market_hours()
 
-    scheduler.add_job(func=update_stock_prices, trigger='interval', seconds=5)
+    scheduler.add_job(func=update_stock_prices, trigger='interval', seconds=1)
     scheduler.start()
 
     from .auth import auth as auth_blueprint
