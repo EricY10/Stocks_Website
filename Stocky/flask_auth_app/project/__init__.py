@@ -39,7 +39,7 @@ def update_stock_prices():
         try:
             stocks = Stock.query.all()
             for stock in stocks:
-                fluctuation = random.uniform(-0.05, 0.2)
+                fluctuation = random.uniform(-0.05, 0.04)
                 stock.price = round(stock.price * (1 + fluctuation), 2)
             db.session.commit()
             for stock in stocks:
