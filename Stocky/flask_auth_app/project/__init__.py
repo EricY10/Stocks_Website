@@ -39,8 +39,8 @@ def update_stock_prices():
         try:
             stocks = Stock.query.all()
             for stock in stocks:
-                fluctuation = random.uniform(-0.05, 0.07)
-                stock.price = round(stock.price * (1 + fluctuation), 2)
+                fluctuation = random.uniform(-0.05, 0.05)
+                stock.price = round(stock.price * (1 + fluctuation), 10)
             db.session.commit()
             for stock in stocks:
                 socketio.emit('stock_price_update', {'symbol': stock.symbol, 'new_price': stock.price})
